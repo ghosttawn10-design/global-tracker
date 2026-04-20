@@ -1,0 +1,63 @@
+You are an expert full-stack developer specializing in premium logistics SaaS products. You are now taking over an EXISTING Next.js 15 + TypeScript + Tailwind + shadcn/ui + Framer Motion + Drizzle + Neon Postgres application called "GlobalTrack Logistique".
+
+Your mission: Perform a complete, deep audit of the current codebase and transform it into a **production-ready, hyper-professional, mature, futuristic, and visually stunning** shipment tracking & analytics website that looks and feels like a real high-end company (FedEx/UPS/DHL level polish).
+
+### CRITICAL FIXES & IMPROVEMENTS REQUIRED (do ALL of them):
+
+1. **UI/UX Overhaul – Make it Premium & Mature**
+   - The current UI looks childish and AI-generated. Redesign everything with modern, clean, sophisticated aesthetics: glassmorphism accents where appropriate, elegant typography, high-end color palette (deep navy, emerald green accents, white/gray), subtle gradients, and premium spacing.
+   - Add beautiful high-resolution background images / hero visuals (dark elegant logistics-themed backgrounds).
+   - Support **image uploads** (not just URLs) in Admin → Settings for:
+     - Company Logo (header + favicon)
+     - Hero background image (landing page)
+     - Any other hero images or banners
+   - Images should be uploaded via form (use Next.js built-in file handling + save to /public/uploads folder or base64 in Neon for simplicity – no external services). Display uploaded images correctly.
+   - Professional logo generation or placeholder that looks premium (you can use SVG or suggest a modern text + icon logo).
+
+2. **Fix All Broken / Incomplete Functionalities**
+   - Tracking number generation in Admin must work perfectly: when admin creates/updates a shipment, it must be **immediately trackable** on the public side with correct data.
+   - Map tracking is currently random and broken: the marker MUST smoothly follow the exact polyline/route defined by the admin (origin → destination + any waypoints). Use animated marker movement with setInterval that respects the route coordinates. No jumping between random countries.
+   - When creating a shipment in admin, location fields (origin, destination, waypoints) must use searchable dropdowns or map-based selection (use Leaflet search control or a list of realistic cities/countries with coordinates so admin can pick real places).
+   - Public Analytics page must be removed or turned into a very limited preview. Full analytics (charts, real stats) must be **Admin-only**.
+   - Public homepage counters (shipments delivered, countries, etc.) must start with realistic high numbers (e.g. 124,850 shipments, 87 countries, 4.9k active, etc.) and increment naturally over time (use localStorage or simple interval in client for demo).
+
+3. **Security & Professionalism**
+   - Login page MUST NOT display any admin credentials anywhere in the UI. Remove any hardcoded email/password shown on screen.
+   - All admin credentials and default login info must ONLY appear in README.md and .env.example.
+   - No leaking of any sensitive information.
+
+4. **Floating Contact Bubbles & Features**
+   - Keep WhatsApp, Telegram, and Tawk.to floating buttons (bottom-right, elegant, animated). Make sure they work perfectly when enabled in settings.
+   - All animations (Framer Motion) must be buttery smooth and premium.
+
+5. **Admin Dashboard Enhancements**
+   - Make the entire admin UI more professional and spacious.
+   - Shipments page: better table, easy status updates, live preview of the map route before saving.
+   - Settings page: full control over all site content + image uploads + contact bubble toggles.
+   - Analytics in admin: beautiful charts with real-looking data from Neon + filters.
+
+6. **Mobile-First Design + Smart Automatic Simulation + SMTP Email Notifications**
+   - **Mobile-First Approach**: Redesign the entire application with a true mobile-first mindset. The public website and tracking page must feel native and excellent on mobile phones (especially iPhone). On desktop it can look similar but slightly expanded. Use responsive Tailwind classes properly and test mobile UX flows (bottom navigation where appropriate, touch-friendly buttons, optimized map height on small screens).
+   - **Admin Dashboard Mobile Experience**: Implement elegant top tabs and bottom navigation tabs. Each bottom tab (Dashboard, Shipments, Analytics, Contacts, Testimonials, Settings) should have its own clean top sub-tabs where needed. Make the admin UI feel modern and easy to use on both mobile and desktop.
+   - **Smart Automatic Simulation**: The tracking progress and map movement must be intelligent and automatic. Once the admin sets the route (origin, waypoints, destination) and initial status, the system should automatically simulate realistic progress over time (marker moves smoothly along the exact polyline, status updates automatically at logical intervals) without the admin having to manually update every step. The simulation must respect the route the admin defined — no random jumps.
+   - **SMTP Email Notifications (Optional but fully implemented)**: In Admin → Settings, add a section for SMTP configuration (host, port, email, password, enabled toggle). When enabled and configured, any new contact form submission from the public "Contact Us" page should automatically send a professional email notification to the admin with the submitter’s details. Use Nodemailer for this. Store SMTP settings securely in Neon.
+
+7. **Production-Ready Requirements**
+   - Full audit of every file: fix any bugs, improve error handling, loading states, mobile responsiveness (especially iPhone login and map).
+   - Make the app feel thoroughly tested – no broken flows.
+   - Update README.md with:
+     - Clear setup instructions
+     - How to run seed
+     - Default admin credentials (only here, not in UI)
+     - Deploy guide for Render
+   - Keep the exact same tech stack (Next.js 15 App Router, Drizzle + Neon, React-Leaflet, etc.). Do not add heavy new dependencies unless absolutely necessary for SMTP (Nodemailer is acceptable).
+   - Optimize performance, add proper metadata/SEO, accessibility.
+
+### Workflow:
+- First, analyze the entire existing codebase.
+- Then systematically fix and upgrade every section listed above, in order.
+- Pay special attention to making the UI look mature, premium, and non-childish.
+- Output the complete updated project as individual files with clear explanations of what you changed and why.
+- At the end, provide a summary of all major improvements made.
+
+Begin the audit and start rebuilding the improved version now. Make this the final, polished, production-ready version that will impress anyone who sees it.

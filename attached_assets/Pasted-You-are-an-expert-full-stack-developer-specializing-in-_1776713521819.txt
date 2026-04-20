@@ -1,0 +1,68 @@
+You are an expert full-stack developer specializing in premium logistics SaaS platforms. You are taking over an EXISTING Next.js 15 + TypeScript + Tailwind + shadcn/ui + Framer Motion + Drizzle ORM + Neon Postgres application named "GlobalTrack Logistique".
+
+Your mission is to perform a complete deep audit and deliver the FINAL production-ready version. Fix every issue mentioned, improve where needed, and make the app feel hyper-realistic, professional, and mature — never childish or basic.
+
+### CRITICAL FIXES & IMPROVEMENTS (implement ALL of them):
+
+1. **Admin Settings – Full Manageability**
+   - Add fields in Admin → Settings to change Admin Email and Password (securely update the auth credentials).
+   - Support image uploads (not just URLs) for:
+     - Company Logo (header + favicon) if not done or working 
+     - Hero background image(s) on the landing page (allow multiple images with slide/animation support if not done or working ). Currently there is no background image so add a default high-resolution dark and make sure logistics-themed background image (subtle truck/highway/global network with overlay)
+   - All url/uploaded images all must be stored in Neon (use base64 or appropriate blob handling in Drizzle) so they persist after deployment to Render/GitHub.
+   - Fix any save/upload issues — uploaded images and changes must actually apply and be visible immediately after saving.
+
+2. **Testimonials Management**
+   - Fix editing: changes must save correctly and reflect immediately in both admin dashboard and public testimonials section.
+   - Add image upload support for testimonial avatars/profile pictures (store in Neon, not external URLs).
+   - Make sure testimonials display real-looking faces when images are uploaded. Make sure if the is any already sample testimonials add sample pics too if they don’t have, and if the is no testimonials add samples 
+
+3. **Contacts / Support Messages**
+   - In Admin → Contacts, add a "Delete" button for each message so the admin can clean up old entries and prevent the list from becoming overwhelming.
+
+4. **Analytics Dashboard (Admin Only)**
+   - Change trend chart from monthly to **daily trend**.
+   - Fix overlapping text and layout issues in Status Distribution (pie/donut chart). Reduce the size of the circular diagram if needed so labels ("Delivered", "In Transit", "Processing", "Delayed") do not overlap.
+   - Ensure all charts render correctly with real-looking data from Neon.
+
+5. **Live Tracking Map – Make it Extremely Realistic & Smart**
+   - Restore and significantly improve the live map (it was better in earlier versions — bring back the smooth animated tracking experience).
+   - The marker MUST smoothly follow the exact route defined by the admin (origin → waypoints → destination) using polyline + animated movement.
+   - Marker movement speed must adapt intelligently to map zoom level (when user zooms in/out or resizes the map on mobile/desktop, the animation speed adjusts so it doesn't look too fast or too slow).
+   - Progress percentage (set by admin or auto-simulated) must directly control the marker position on the route — they must stay perfectly aligned.
+   - Status updates, progress bar, and map marker must move simultaneously and realistically 
+   - The simulation must feel live and automatic once the shipment is created, while still allowing admin to manually override status/progress when needed.
+   - Origin, Destination, and Waypoints in shipment creation must support **global searchable locations** (use Leaflet search control or a robust geolocation search that pulls real-world cities/countries from the map). Do not use limited hardcoded lists — make it feel like Google Maps level search.
+
+6. **Shipment Creation & Simulation Intelligence**
+   - When admin creates/updates a shipment, the route (origin, waypoints, destination) must be properly saved and immediately reflected in the live tracking map for that tracking number.
+   - Progress and live marker must stay synchronized.
+   - Status should be selectable by admin but the overall simulation (progress + marker movement) should continue intelligently from the current state.
+
+8. **Legal Pages Manageability**
+   - In Admin → Settings, add sections to edit Privacy Policy, Terms of Service, and Cookies Policy content (rich text or textarea that saves to Neon and displays on the public legal pages). Write each too by default 
+
+9. **Hero Background & Visual Polish**
+   - Landing page hero must have a beautiful default dark logistics-themed background image (truck/highway, global network, or similar cinematic style) with dark overlay.
+   - Admin must be able to change/replace it via upload + support multiple sliding images with animation.
+
+10. **Production-Ready & Deployment**
+    - Full audit: fix all bugs, improve error handling, loading states, and responsiveness.
+    - All data (testimonials, contacts, shipments, settings, uploaded images) must persist correctly in Neon after deployment.
+    - Create a new file called **setup.md** with clear instructions:
+      - How to set up evNeon DATABASE_URL
+      - Default admin credentials (only in this file)
+      - Step-by-step and setup Render deployment guide (including environment variables)
+      - Any other post-deployment steps
+    - At the end of your work, automatically push the final code to the GitHub repository: github.com/ghosttown10-design/global-tracker and equally setup neon (use the token provided in secrets for the push and the other secret of neon string for neon setup(even though when deploying  app must set it up automatically).
+
+    - Make the app feel thoroughly tested and production-ready.
+
+### Workflow:
+- First, deeply analyze the entire current codebase.
+- Fix issues in the exact priority order above (especially the live map alignment, image uploads, editing bugs, and global location search).
+- Output updated files clearly, with comments explaining major changes.
+- End with a summary of all fixes and improvements made.
+- Finally, push to GitHub and confirm the setup.md file exists.
+
+Begin now. This must be the final polished version — make GlobalTrack Logistique look and feel like a premium, realistic logistics platform.

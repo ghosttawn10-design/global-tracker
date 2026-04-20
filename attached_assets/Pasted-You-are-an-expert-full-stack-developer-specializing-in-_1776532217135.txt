@@ -1,0 +1,62 @@
+You are an expert full-stack developer specializing in modern, high-end SaaS and logistics websites with exceptional UI/UX. Build a complete, production-ready, fully functional **Shipment Tracking & Analytics Website** called "[GlobalTrack Logistique]" ( or let me customize later in app). Everything must feel extremely realistic, premium, smooth, and professional — like a real company site from FedEx/UPS/DHL but fully simulated (no real carrier APIs).
+
+### Tech Stack (must be used):
+- **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS + shadcn/ui + Framer Motion for buttery-smooth animations and transitions.
+- **Maps**: Leaflet.js or React-Leaflet for the live tracking map. Make the map beautiful with custom markers, smooth animated movement of the package/truck marker along a realistic route (use polyline + animated marker that moves every second or on timer). Support toggle between 2D and pseudo-3D feel (via tilt/zoom or Mapbox GL if you prefer, but keep it lightweight). The map must feel "live" with pulsing markers, status updates, and route progress.
+- **Database**: Neon Postgres (use @neondatabase/serverless or Drizzle ORM + Neon serverless driver). Store: tracking records, shipments, testimonials, contact messages, site settings (hero text, colors, WhatsApp number, Tawk.to script, social links, etc.), admin users.
+- **Authentication**: Simple secure login for Admin only (NextAuth.js or Clerk/Lucia — no public user signup). After login, redirect directly to Admin Dashboard. Hardcode or seed one admin account (email/password) that can be changed later via env.
+- **State Management**: Zustand or React Context + TanStack Query where needed.
+- **Deployment-friendly**: Single repo, easy to deploy on Render (full app) or Vercel. Use environment variables for Neon connection string. No heavy external services except optional Tawk.to embed. Make it mobile-responsive first (works perfectly on iPhone, no login issues).
+
+### Public-Facing Website (Visitor Side):
+- **Modern Landing Page**: Hero section with animated headline ("Track Your Shipment in Real-Time"), search bar for Tracking Number, trust badges, animated statistics (packages delivered, countries, etc.).
+- **How It Works** section with timeline/animations.
+- **Live Tracking Page**: Big input for Tracking Number. On submit, simulate lookup (from Neon or fallback mock data) and show:
+  - Detailed status timeline with icons and timestamps (e.g., Order Placed → Picked Up → In Transit → Out for Delivery → Delivered).
+  - Beautiful full-screen or large map showing current location with smooth animated marker moving along a route (use predefined routes per tracking number or random realistic ones). Marker should pulse, show speed/ETA, and update "live" with fake progress every few seconds using timers/setInterval.
+  - Package details, estimated delivery, history logs.
+  - Make it feel hyper-realistic: smooth transitions, loading states, error handling for invalid codes.
+- **Analytics Dashboard (Public Preview)**: Simple public analytics page showing fake company-wide stats with charts (use Recharts or Tremor).
+- **Testimonials**: Carousel or grid with real-looking quotes, photos (use placeholders or Unsplash), managed via Neon.
+- **Contact Us**: Form that submits to Neon (store messages for admin to view). Include email, phone.
+- **Footer**: Links, social icons (manageable), copyright.
+
+**Floating Contact Bubbles** (always visible, elegant, bottom-right or customizable):
+- Toggleable via Admin: WhatsApp (opens wa.me with admin's number), Telegram, and Tawk.to live chat widget.
+- If multiple enabled, show stacked elegant floating buttons or a main bubble that expands.
+- WhatsApp: Use admin-stored phone number → opens https://wa.me/{number}?text=Hello...
+- Tawk.to: Allow admin to paste the widget script ID/code.
+- Smooth animations on hover/click.
+
+All animations must be premium: page transitions, scroll reveals, map interactions, status updates, loading skeletons, micro-interactions.
+
+### Admin Dashboard (Protected):
+- Clean, modern sidebar layout (dashboard, shipments, analytics, settings, contacts, testimonials).
+- **Shipments Management**: List of all shipments. Ability to create new shipment (generate realistic Tracking Number, e.g., STK-XXXXXX), assign details (origin, destination, route points for map), update status (with timestamps), simulate progress.
+  - When admin creates/updates a shipment, it becomes immediately trackable on the public side with realistic map data.
+- **Analytics**: Real-looking charts (on-time delivery rate, active shipments, delays, etc.) using mock + Neon data. Filters by date/status.
+- **Contacts/Support**: View submitted contact forms/messages, mark as read/replied.
+- **Settings**:
+  - Manage hero content, company info, colors/theme.
+  - WhatsApp number, Telegram link, Tawk.to script.
+  - Enable/disable floating buttons.
+  - Social media links.
+  - Testimonials: Add/edit/delete.
+  - Site-wide settings.
+- Beautiful UI with dark/light mode option, responsive.
+
+### Key Requirements (must all be implemented perfectly):
+- **Simulation but Realistic**: No real integrations except Neon. Use timers, predefined/mock routes, and fake data that updates dynamically. Tracking must feel "live" — marker moves smoothly, status changes over time (demo mode).
+- **Powerful UI/UX**: Dark/light themes, glassmorphism or clean minimal premium design, excellent typography, high contrast, fast loading. Make it a "game-changer" — buttery animations everywhere (Framer Motion). Mobile-first, perfect on iPhone (test login/map smoothness).
+- **No Breakage**: Robust error handling, loading states, validation. Production-ready code (env vars, .env.example, README with setup/deploy instructions).
+- **Admin Flexibility**: Everything changeable via dashboard (no hard-coded content except seeds).
+- **Performance & Deploy**: Optimized, no unnecessary dependencies. Easy to push to GitHub and deploy on Render without issues. Include seed script for initial data (sample shipments, testimonials).
+- **Extras**: SEO-friendly (metadata), accessibility, fake "live" updates on map, progress bars, ETA calculations, multi-step tracking visuals.
+
+Generate the full project structure with all necessary files. Include:
+- Clear setup instructions (Neon connection, env vars, run commands).
+- Seed data script.
+- README.md with features list and deploy guide.
+- Make the code clean, well-commented, and modular.
+
+Begin now

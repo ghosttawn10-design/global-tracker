@@ -1,0 +1,1016 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: GlobalTrack Logistique API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: tracking
+    description: Shipment tracking operations
+  - name: shipments
+    description: Shipment management
+  - name: admin
+    description: Admin operations
+  - name: contacts
+    description: Contact messages
+  - name: testimonials
+    description: Testimonials
+  - name: settings
+    description: Site settings
+  - name: analytics
+    description: Analytics data
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /track/{trackingNumber}:
+    get:
+      operationId: trackShipment
+      tags: [tracking]
+      summary: Track a shipment by tracking number
+      parameters:
+        - name: trackingNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shipment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingResult"
+        "404":
+          description: Shipment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shipments:
+    get:
+      operationId: listShipments
+      tags: [shipments]
+      summary: List all shipments (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Shipments list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentsListResponse"
+    post:
+      operationId: createShipment
+      tags: [shipments]
+      summary: Create a new shipment (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShipmentBody"
+      responses:
+        "201":
+          description: Shipment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+
+  /shipments/{id}:
+    get:
+      operationId: getShipment
+      tags: [shipments]
+      summary: Get shipment by ID (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Shipment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateShipment
+      tags: [shipments]
+      summary: Update a shipment (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateShipmentBody"
+      responses:
+        "200":
+          description: Updated shipment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shipment"
+    delete:
+      operationId: deleteShipment
+      tags: [shipments]
+      summary: Delete a shipment (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /analytics/summary:
+    get:
+      operationId: getAnalyticsSummary
+      tags: [analytics]
+      summary: Get analytics summary stats
+      responses:
+        "200":
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsSummary"
+
+  /analytics/shipments-by-status:
+    get:
+      operationId: getShipmentsByStatus
+      tags: [analytics]
+      summary: Get shipments grouped by status
+      responses:
+        "200":
+          description: Shipments by status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StatusCount"
+
+  /analytics/shipments-by-month:
+    get:
+      operationId: getShipmentsByMonth
+      tags: [analytics]
+      summary: Get shipments grouped by month
+      responses:
+        "200":
+          description: Monthly shipments data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyData"
+
+  /contacts:
+    get:
+      operationId: listContacts
+      tags: [contacts]
+      summary: List contact messages (admin)
+      parameters:
+        - name: read
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Contact messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactMessage"
+    post:
+      operationId: submitContact
+      tags: [contacts]
+      summary: Submit a contact message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContactBody"
+      responses:
+        "201":
+          description: Message submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessage"
+
+  /contacts/{id}/read:
+    put:
+      operationId: markContactRead
+      tags: [contacts]
+      summary: Mark a contact message as read (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessage"
+
+  /testimonials:
+    get:
+      operationId: listTestimonials
+      tags: [testimonials]
+      summary: List testimonials
+      parameters:
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Testimonials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Testimonial"
+    post:
+      operationId: createTestimonial
+      tags: [testimonials]
+      summary: Create a testimonial (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestimonialBody"
+      responses:
+        "201":
+          description: Testimonial created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+
+  /testimonials/{id}:
+    put:
+      operationId: updateTestimonial
+      tags: [testimonials]
+      summary: Update a testimonial (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestimonialBody"
+      responses:
+        "200":
+          description: Updated testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+    delete:
+      operationId: deleteTestimonial
+      tags: [testimonials]
+      summary: Delete a testimonial (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [settings]
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get site settings
+      responses:
+        "200":
+          description: Site settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update site settings (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteSettings"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Get current admin session
+      responses:
+        "200":
+          description: Admin info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    RoutePoint:
+      type: object
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+        label:
+          type: string
+        timestamp:
+          type: string
+      required:
+        - lat
+        - lng
+
+    TrackingEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        timestamp:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+      required:
+        - id
+        - status
+        - description
+        - location
+        - timestamp
+
+    TrackingResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        trackingNumber:
+          type: string
+        senderName:
+          type: string
+        recipientName:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        currentStatus:
+          type: string
+        currentLocation:
+          type: string
+        estimatedDelivery:
+          type: string
+        weight:
+          type: string
+        dimensions:
+          type: string
+        packageType:
+          type: string
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+        routePoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoutePoint"
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrackingEvent"
+        progressPercent:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - trackingNumber
+        - senderName
+        - recipientName
+        - origin
+        - destination
+        - currentStatus
+        - currentLocation
+        - estimatedDelivery
+        - packageType
+        - events
+        - progressPercent
+        - createdAt
+        - updatedAt
+
+    Shipment:
+      type: object
+      properties:
+        id:
+          type: integer
+        trackingNumber:
+          type: string
+        senderName:
+          type: string
+        senderEmail:
+          type: string
+        recipientName:
+          type: string
+        recipientEmail:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        currentStatus:
+          type: string
+        currentLocation:
+          type: string
+        estimatedDelivery:
+          type: string
+        weight:
+          type: string
+        dimensions:
+          type: string
+        packageType:
+          type: string
+        description:
+          type: string
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+        routePoints:
+          type: string
+        progressPercent:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - trackingNumber
+        - senderName
+        - recipientName
+        - origin
+        - destination
+        - currentStatus
+        - currentLocation
+        - estimatedDelivery
+        - packageType
+        - progressPercent
+        - createdAt
+        - updatedAt
+
+    ShipmentsListResponse:
+      type: object
+      properties:
+        shipments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Shipment"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - shipments
+        - total
+        - page
+        - limit
+
+    CreateShipmentBody:
+      type: object
+      properties:
+        senderName:
+          type: string
+        senderEmail:
+          type: string
+        recipientName:
+          type: string
+        recipientEmail:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        currentStatus:
+          type: string
+          default: "pending"
+        currentLocation:
+          type: string
+        estimatedDelivery:
+          type: string
+        weight:
+          type: string
+        dimensions:
+          type: string
+        packageType:
+          type: string
+          default: "parcel"
+        description:
+          type: string
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+        routePoints:
+          type: string
+        progressPercent:
+          type: integer
+          default: 0
+      required:
+        - senderName
+        - recipientName
+        - origin
+        - destination
+        - currentLocation
+        - estimatedDelivery
+        - packageType
+
+    UpdateShipmentBody:
+      type: object
+      properties:
+        senderName:
+          type: string
+        senderEmail:
+          type: string
+        recipientName:
+          type: string
+        recipientEmail:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        currentStatus:
+          type: string
+        currentLocation:
+          type: string
+        estimatedDelivery:
+          type: string
+        weight:
+          type: string
+        dimensions:
+          type: string
+        packageType:
+          type: string
+        description:
+          type: string
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+        routePoints:
+          type: string
+        progressPercent:
+          type: integer
+
+    AnalyticsSummary:
+      type: object
+      properties:
+        totalShipments:
+          type: integer
+        activeShipments:
+          type: integer
+        deliveredShipments:
+          type: integer
+        pendingShipments:
+          type: integer
+        delayedShipments:
+          type: integer
+        onTimeRate:
+          type: number
+        countriesServed:
+          type: integer
+        avgDeliveryDays:
+          type: number
+        unreadContacts:
+          type: integer
+      required:
+        - totalShipments
+        - activeShipments
+        - deliveredShipments
+        - pendingShipments
+        - delayedShipments
+        - onTimeRate
+        - countriesServed
+        - avgDeliveryDays
+        - unreadContacts
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required:
+        - status
+        - count
+
+    MonthlyData:
+      type: object
+      properties:
+        month:
+          type: string
+        count:
+          type: integer
+        delivered:
+          type: integer
+      required:
+        - month
+        - count
+        - delivered
+
+    ContactMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - message
+        - isRead
+        - createdAt
+
+    CreateContactBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+      required:
+        - name
+        - email
+        - message
+
+    Testimonial:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+        company:
+          type: string
+        quote:
+          type: string
+        rating:
+          type: integer
+        avatarUrl:
+          type: string
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - quote
+        - rating
+        - isActive
+        - createdAt
+
+    CreateTestimonialBody:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        company:
+          type: string
+        quote:
+          type: string
+        rating:
+          type: integer
+        avatarUrl:
+          type: string
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+      required:
+        - name
+        - quote
+        - rating
+
+    SiteSettings:
+      type: object
+      properties:
+        companyName:
+          type: string
+        heroTitle:
+          type: string
+        heroSubtitle:
+          type: string
+        primaryColor:
+          type: string
+        logoUrl:
+          type: string
+        heroImages:
+          type: string
+        heroImageSlideEnabled:
+          type: boolean
+        heroImageSlideInterval:
+          type: integer
+        whatsappNumber:
+          type: string
+        whatsappEnabled:
+          type: boolean
+        telegramLink:
+          type: string
+        telegramEnabled:
+          type: boolean
+        tawktoScript:
+          type: string
+        tawktoEnabled:
+          type: boolean
+        facebookUrl:
+          type: string
+        twitterUrl:
+          type: string
+        instagramUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        address:
+          type: string
+        smtpHost:
+          type: string
+        smtpPort:
+          type: string
+        smtpUser:
+          type: string
+        smtpPass:
+          type: string
+        smtpFrom:
+          type: string
+        smtpTo:
+          type: string
+        smtpEnabled:
+          type: boolean
+        darkModeDefault:
+          type: boolean
+      required:
+        - companyName
+        - heroTitle
+        - heroSubtitle
+
+    RequestUploadUrlBody:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+      required:
+        - name
+        - size
+        - contentType
+
+    RequestUploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+      required:
+        - uploadURL
+        - objectPath
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        admin:
+          $ref: "#/components/schemas/AdminUser"
+      required:
+        - success
+        - admin
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - email
+        - name
