@@ -10,7 +10,12 @@ import { useGetSettings, useUpdateSettings, getGetSettingsQueryKey } from "@work
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
-const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "") + "/api";
+const configuredApiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+const API_BASE = (
+  configuredApiBase
+    ? configuredApiBase.replace(/\/+$/, "").replace(/\/api$/, "")
+    : window.location.origin.replace(/\/+$/, "")
+) + "/api";
 
 function SettingsSection({ icon: Icon, title, children, delay = 0 }: {
   icon: React.ElementType;
@@ -357,9 +362,29 @@ export default function AdminSettings() {
         body: JSON.stringify(body),
       });
 
+      const contentType = res.headers.get("content-type") ?? "";
+      let data: any = null;
+      if (contentType.toLowerCase().includes("application/json")) {
+        try {
+          data = await res.json();
+        } catch {
+          // ignore
+        }
+      }
+
       if (!res.ok) {
-        const err = await res.json();
-        toast({ title: "Update failed", description: err.message ?? "Could not update credentials.", variant: "destructive" });
+        const message = data?.message ?? "Could not update credentials.";
+        toast({ title: "Update failed", description: message, variant: "destructive" });
+        return;
+      }
+
+      // Guard against false-positive success (e.g. hitting the wrong origin and getting HTML)
+      if (!data || data.success !== true) {
+        toast({
+          title: "Update failed",
+          description: "Unexpected response from server. Check VITE_API_BASE_URL and domain routing.",
+          variant: "destructive",
+        });
         return;
       }
 
