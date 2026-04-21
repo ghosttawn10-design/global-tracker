@@ -2,7 +2,6 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
-import esbuildPluginPino from "esbuild-plugin-pino";
 import { rm } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
@@ -13,6 +12,20 @@ const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
+
+  const pinoModule = await import("esbuild-plugin-pino");
+  const esbuildPluginPino =
+    typeof pinoModule.default === "function"
+      ? pinoModule.default
+      : typeof pinoModule.esbuildPluginPino === "function"
+        ? pinoModule.esbuildPluginPino
+        : undefined;
+
+  if (!esbuildPluginPino) {
+    throw new Error(
+      "Failed to load esbuild-plugin-pino. Ensure it is installed and exports a plugin function."
+    );
+  }
 
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
