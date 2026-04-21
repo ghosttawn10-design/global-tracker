@@ -1,7 +1,6 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { build as esbuild } from "esbuild";
 import { rm } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
@@ -9,11 +8,45 @@ globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 
+process.on("uncaughtException", (err) => {
+  console.error("[api-server build] uncaughtException", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("[api-server build] unhandledRejection", err);
+  process.exit(1);
+});
+
 async function buildAll() {
+  console.info("[api-server build] node", process.version);
+  console.info("[api-server build] platform", process.platform, process.arch);
+  console.info("[api-server build] cwd", process.cwd());
+  console.info("[api-server build] artifactDir", artifactDir);
+
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
-  const pinoModule = await import("esbuild-plugin-pino");
+  let esbuildBuild;
+  try {
+    const esbuildModule = await import("esbuild");
+    esbuildBuild = esbuildModule.build;
+    if (typeof esbuildBuild !== "function") throw new Error("esbuild.build is not a function");
+    console.info("[api-server build] loaded esbuild");
+  } catch (err) {
+    console.error("[api-server build] failed to import esbuild", err);
+    throw err;
+  }
+
+  let pinoModule;
+  try {
+    pinoModule = await import("esbuild-plugin-pino");
+    console.info("[api-server build] loaded esbuild-plugin-pino");
+  } catch (err) {
+    console.error("[api-server build] failed to import esbuild-plugin-pino", err);
+    throw err;
+  }
+
   const esbuildPluginPino =
     typeof pinoModule.default === "function"
       ? pinoModule.default
@@ -27,7 +60,16 @@ async function buildAll() {
     );
   }
 
-  await esbuild({
+  try {
+    await import("pino-pretty");
+    console.info("[api-server build] loaded pino-pretty");
+  } catch (err) {
+    console.error("[api-server build] failed to import pino-pretty", err);
+    throw err;
+  }
+
+  try {
+    await esbuildBuild({
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
     platform: "node",
     bundle: true,
@@ -130,7 +172,17 @@ globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
 globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
-  });
+    });
+  } catch (err) {
+    console.error("[api-server build] esbuild failed", err);
+    if (err && typeof err === "object" && Array.isArray(err.errors)) {
+      console.error("[api-server build] esbuild errors", err.errors);
+    }
+    if (err && typeof err === "object" && Array.isArray(err.warnings)) {
+      console.error("[api-server build] esbuild warnings", err.warnings);
+    }
+    throw err;
+  }
 }
 
 buildAll().catch((err) => {
