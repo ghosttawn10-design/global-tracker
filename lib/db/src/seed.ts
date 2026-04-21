@@ -139,14 +139,22 @@ async function seed() {
 
   // ── Testimonials ───────────────────────────────────────────────────────────
   console.log("  Upserting 12 testimonials with avatars...");
-  await db.execute(sql`TRUNCATE TABLE testimonials RESTART IDENTITY CASCADE`);
-  await db.insert(testimonialsTable).values(TESTIMONIALS);
-  console.log("  ✓ 12 testimonials inserted");
+  try {
+    await db.execute(sql`TRUNCATE TABLE testimonials RESTART IDENTITY CASCADE`);
+  } catch (e) {
+    console.log("    Note: Could not truncate testimonials (table may not exist yet)");
+  }
+  await db.insert(testimonialsTable).values(TESTIMONIALS).onConflictDoNothing();
+  console.log("  12 testimonials inserted");
 
   // ── Shipments ──────────────────────────────────────────────────────────────
   console.log("  Inserting 5 realistic shipments...");
-  await db.execute(sql`TRUNCATE TABLE tracking_events RESTART IDENTITY CASCADE`);
-  await db.execute(sql`TRUNCATE TABLE shipments RESTART IDENTITY CASCADE`);
+  try {
+    await db.execute(sql`TRUNCATE TABLE tracking_events RESTART IDENTITY CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE shipments RESTART IDENTITY CASCADE`);
+  } catch (e) {
+    console.log("    Note: Could not truncate shipments/tables (may not exist yet)");
+  }
 
   const now = new Date();
   const daysFromNow = (d: number) =>

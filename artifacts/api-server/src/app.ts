@@ -26,10 +26,27 @@ app.use(
     },
   }),
 );
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow non-browser requests (no Origin header)
+      if (!origin) return callback(null, true);
+
+      // If no allowlist is configured, allow all (useful for local dev)
+      if (allowedOrigins.length === 0) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      return callback(null, false);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

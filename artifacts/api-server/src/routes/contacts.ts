@@ -3,7 +3,6 @@ import { db, contactMessagesTable, siteSettingsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { SubmitContactBody, MarkContactReadParams, ListContactsQueryParams } from "@workspace/api-zod";
 import nodemailer from "nodemailer";
-import { z } from "zod";
 
 const router = Router();
 

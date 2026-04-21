@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, Search, Edit2, Trash2, Eye, MapPin, ChevronDown, ChevronUp, X, Loader2 } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Eye, MapPin, ChevronDown, ChevronUp, X, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -180,6 +180,49 @@ const defaultForm = {
 
 type ShipmentForm = typeof defaultForm;
 
+function toDatetimeLocalInput(value: string): string {
+  const v = value.trim();
+  if (!v) return "";
+
+  // If stored as date-only (YYYY-MM-DD), provide a default time for editing.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    return `${v}T00:00`;
+  }
+
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) {
+    return "";
+  }
+
+  // Convert to local time and format as YYYY-MM-DDTHH:mm
+  const tzOffsetMs = d.getTimezoneOffset() * 60000;
+  const local = new Date(d.getTime() - tzOffsetMs);
+  return local.toISOString().slice(0, 16);
+}
+
+function fromDatetimeLocalInput(value: string): string {
+  const v = value.trim();
+  if (!v) return "";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toISOString();
+}
+
+function formatEstimatedDelivery(value: string): string {
+  const v = value.trim();
+  if (!v) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return v;
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function ShipmentFormModal({ initial, onSave, trigger }: {
   initial?: ShipmentForm & { id?: number };
   onSave: (data: ShipmentForm) => void;
@@ -243,6 +286,7 @@ function ShipmentFormModal({ initial, onSave, trigger }: {
   const handleSave = () => {
     const finalForm = {
       ...form,
+      estimatedDelivery: fromDatetimeLocalInput(form.estimatedDelivery) || form.estimatedDelivery,
       routePoints: JSON.stringify(routePoints),
     };
     onSave(finalForm);
@@ -378,7 +422,11 @@ function ShipmentFormModal({ initial, onSave, trigger }: {
               </div>
               <div className="space-y-1.5">
                 <Label>Est. Delivery *</Label>
-                <Input type="date" value={form.estimatedDelivery} onChange={(e) => set("estimatedDelivery", e.target.value)} />
+                <Input
+                  type="datetime-local"
+                  value={toDatetimeLocalInput(form.estimatedDelivery)}
+                  onChange={(e) => set("estimatedDelivery", e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Current Location</Label>
@@ -433,6 +481,30 @@ function ShipmentFormModal({ initial, onSave, trigger }: {
 export default function AdminShipments() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  const copyToClipboard = async (text: string, id: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
   const { data, isLoading } = useListShipments({ page: 1, limit: 100 }, {
     query: { queryKey: getListShipmentsQueryKey({ page: 1, limit: 100 }) },
   });
@@ -524,7 +596,26 @@ export default function AdminShipments() {
                     transition={{ delay: i * 0.02 }}
                     className="hover:bg-muted/20 transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono font-semibold text-xs">{ship.trackingNumber}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-semibold text-xs">{ship.trackingNumber}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 hover:text-primary"
+                          title="Copy tracking number"
+                          onClick={() => copyToClipboard(ship.trackingNumber, ship.id)}
+                        >
+                          {copiedId === ship.id ? (
+                            <div className="h-3.5 w-3.5 rounded bg-green-500 flex items-center justify-center">
+                              <div className="h-2 w-1.5 bg-white rounded-sm" style={{ clipPath: 'polygon(0 100%, 0 40%, 40% 40%, 40% 0, 60% 0, 60% 40%, 100% 40%, 100% 100%, 60% 60%, 40% 60%)' }} />
+                            </div>
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-sm">{ship.recipientName}</p>
                       {ship.recipientEmail && <p className="text-xs text-muted-foreground">{ship.recipientEmail}</p>}
@@ -545,7 +636,7 @@ export default function AdminShipments() {
                         <span className="text-xs text-muted-foreground">{ship.progressPercent}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">{ship.estimatedDelivery}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">{formatEstimatedDelivery(ship.estimatedDelivery)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <a href={`/track?number=${ship.trackingNumber}`} target="_blank" rel="noopener noreferrer">

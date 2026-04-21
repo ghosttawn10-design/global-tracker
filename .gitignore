@@ -36,10 +36,16 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
-
+replit.md
 # System Files
 .DS_Store
 Thumbs.db
+setup.md
+# env / secrets
+.env
+**/.env
+cookies.txt
+AGENT_RESUME_CONTEXT.md
 
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

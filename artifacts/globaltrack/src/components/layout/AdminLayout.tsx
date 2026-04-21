@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Globe2, LayoutDashboard, Truck, BarChart3, MessageSquare, Star, Settings, LogOut, Truck as TruckIcon } from "lucide-react";
+import { Globe2, LayoutDashboard, Truck, BarChart3, MessageSquare, Star, Settings, LogOut, Sun, Moon, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminLogout } from "@workspace/api-client-react";
 
@@ -21,9 +21,48 @@ function isActive(current: string, target: string) {
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { logout } = useAuth();
+  const [themeMode, setThemeModeState] = useState<"dark" | "light" | "smart">("smart");
   const { mutate: doLogout } = useAdminLogout({
     mutation: { onSuccess: () => logout() },
   });
+
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = localStorage.getItem("gt_theme_mode");
+        if (raw === "dark" || raw === "light" || raw === "smart") setThemeModeState(raw);
+        else setThemeModeState("smart");
+      } catch {
+        setThemeModeState("smart");
+      }
+    };
+    read();
+    window.addEventListener("gt-theme-mode", read);
+    return () => window.removeEventListener("gt-theme-mode", read);
+  }, []);
+
+  const ThemeIcon = useMemo(() => {
+    if (themeMode === "dark") return Moon;
+    if (themeMode === "light") return Sun;
+    return Sparkles;
+  }, [themeMode]);
+
+  const themeLabel = useMemo(() => {
+    if (themeMode === "dark") return "Dark";
+    if (themeMode === "light") return "Light";
+    return "Smart";
+  }, [themeMode]);
+
+  const cycleTheme = () => {
+    const next = themeMode === "dark" ? "light" : themeMode === "light" ? "smart" : "dark";
+    setThemeModeState(next);
+    const setter = (window as any).setThemeMode as ((m: string) => void) | undefined;
+    if (typeof setter === "function") setter(next);
+    else {
+      try { localStorage.setItem("gt_theme_mode", next); } catch { /* ignore */ }
+      window.dispatchEvent(new Event("gt-theme-mode"));
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -74,6 +113,20 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Desktop Top Bar */}
+        <header className="hidden md:flex border-b border-border bg-card/80 backdrop-blur-xl px-5 h-14 items-center justify-end sticky top-0 z-40">
+          <button
+            type="button"
+            onClick={cycleTheme}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={`Theme: ${themeLabel}. Click to change.`}
+            title={`Theme: ${themeLabel}`}
+          >
+            <ThemeIcon className="h-4 w-4" />
+            <span className="hidden lg:inline">{themeLabel}</span>
+          </button>
+        </header>
+
         {/* Mobile Top Bar */}
         <header className="md:hidden border-b border-border bg-card/80 backdrop-blur-xl px-4 h-14 flex items-center justify-between sticky top-0 z-40">
           <Link href="/" className="flex items-center gap-2">
@@ -82,13 +135,25 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <span className="font-bold text-sm">GT Admin</span>
           </Link>
-          <button
-            onClick={() => doLogout()}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={cycleTheme}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={`Theme: ${themeLabel}. Tap to change.`}
+              title={`Theme: ${themeLabel}`}
+            >
+              <ThemeIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">{themeLabel}</span>
+            </button>
+            <button
+              onClick={() => doLogout()}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>

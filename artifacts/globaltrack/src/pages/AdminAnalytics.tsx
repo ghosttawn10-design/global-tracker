@@ -20,7 +20,12 @@ const STATUS_LABELS: Record<string, string> = {
   delayed: "Delayed",
 };
 
-const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "") + "/api";
+const configuredApiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+const API_BASE = (
+  configuredApiBase
+    ? configuredApiBase.replace(/\/+$/, "").replace(/\/api$/, "")
+    : window.location.origin.replace(/\/+$/, "")
+) + "/api";
 
 function useGetShipmentsByDay() {
   return useQuery({

@@ -27,19 +27,25 @@ router.post("/login", async (req, res): Promise<void> => {
 
   let admin: { id: number; email: string; name: string } | null = null;
 
-  const [dbAdmin] = await db
-    .select()
-    .from(adminUsersTable)
-    .where(eq(adminUsersTable.email, email))
-    .limit(1);
+  try {
+    const [dbAdmin] = await db
+      .select()
+      .from(adminUsersTable)
+      .where(eq(adminUsersTable.email, email))
+      .limit(1);
 
-  if (dbAdmin) {
-    const hashedInput = hashPassword(password);
-    const isValid = dbAdmin.password === hashedInput || dbAdmin.password === password;
-    if (isValid) {
-      admin = { id: dbAdmin.id, email: dbAdmin.email, name: dbAdmin.name };
+    if (dbAdmin) {
+      const hashedInput = hashPassword(password);
+      const isValid = dbAdmin.password === hashedInput || dbAdmin.password === password;
+      if (isValid) {
+        admin = { id: dbAdmin.id, email: dbAdmin.email, name: dbAdmin.name };
+      }
     }
-  } else if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+  } catch {
+    // Database unavailable/misconfigured: fall back to env credentials
+  }
+
+  if (!admin && email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
     admin = { id: 0, email: ADMIN_EMAIL, name: ADMIN_NAME };
   }
 
@@ -53,11 +59,16 @@ router.post("/login", async (req, res): Promise<void> => {
 
   sessions.set(token, { ...admin, expiresAt });
 
+  const forwardedProto = String(req.headers["x-forwarded-proto"] ?? "").toLowerCase();
+  const isHttps = Boolean((req as any).secure) || forwardedProto === "https";
+  const hasOrigin = typeof req.headers.origin === "string" && req.headers.origin.length > 0;
+  const sameSite = isHttps && hasOrigin ? "none" : "lax";
+
   res.cookie("admin_token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: "lax",
+    sameSite,
   });
 
   res.json({ success: true, admin, token });

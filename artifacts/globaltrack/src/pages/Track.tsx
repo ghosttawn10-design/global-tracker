@@ -62,6 +62,7 @@ function TrackingMap({ routePoints, progressPercent }: {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const tileLayerRef = useRef<any>(null);
   const animFrameRef = useRef<number | null>(null);
   const currentPosRef = useRef({ lat: 0, lng: 0 });
 
@@ -86,10 +87,15 @@ function TrackingMap({ routePoints, progressPercent }: {
         attributionControl: false,
       });
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      const isDark = document.documentElement.classList.contains("dark");
+      const tiles = isDark
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+      const tileLayer = L.tileLayer(tiles, {
         subdomains: "abcd",
         maxZoom: 19,
       }).addTo(map);
+      tileLayerRef.current = tileLayer;
 
       if (routePoints.length >= 2) {
         const latlngs = routePoints.map((p) => [p.lat, p.lng] as [number, number]);
@@ -148,6 +154,35 @@ function TrackingMap({ routePoints, progressPercent }: {
         markerRef.current = null;
       }
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!mapInstanceRef.current || !tileLayerRef.current) return;
+
+    const updateTiles = () => {
+      import("leaflet").then((L) => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+        const isDark = document.documentElement.classList.contains("dark");
+        const tiles = isDark
+          ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+
+        if (tileLayerRef.current && tileLayerRef.current._url === tiles) return;
+        if (tileLayerRef.current) {
+          map.removeLayer(tileLayerRef.current);
+          tileLayerRef.current = null;
+        }
+
+        tileLayerRef.current = L.tileLayer(tiles, { subdomains: "abcd", maxZoom: 19 }).addTo(map);
+      });
+    };
+
+    updateTiles();
+    const obs = new MutationObserver(() => updateTiles());
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
   }, []);
 
   useEffect(() => {

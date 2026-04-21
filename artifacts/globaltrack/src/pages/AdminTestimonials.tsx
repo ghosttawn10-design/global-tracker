@@ -10,7 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useListTestimonials, useCreateTestimonial, useUpdateTestimonial, useDeleteTestimonial, getListTestimonialsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
-const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "") + "/api";
+const configuredApiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+const API_BASE = (
+  configuredApiBase
+    ? configuredApiBase.replace(/\/+$/, "")
+    : window.location.origin.replace(/\/+$/, "")
+) + "/api";
 
 async function uploadFile(file: File): Promise<string> {
   const res = await fetch(`${API_BASE}/storage/uploads/request-url`, {

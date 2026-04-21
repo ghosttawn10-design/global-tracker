@@ -27,11 +27,18 @@ export function FloatingContact() {
 
   const hasWhatsApp = settings?.whatsappEnabled && settings?.whatsappNumber;
   const hasTelegram = settings?.telegramEnabled && settings?.telegramLink;
+  const avoidTawk = Boolean((settings as any)?.tawktoEnabled);
 
   if (!hasWhatsApp && !hasTelegram) return null;
 
   return (
-    <div className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-3">
+    <div
+      className={
+        avoidTawk
+          ? "fixed bottom-6 left-5 z-50 flex flex-col items-start gap-3"
+          : "fixed bottom-6 right-5 z-50 flex flex-col items-end gap-3"
+      }
+    >
       <AnimatePresence>
         {isOpen && (
           <motion.div

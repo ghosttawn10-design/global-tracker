@@ -1,18 +1,21 @@
+import { loadRootEnv } from "./lib/load-env";
 import app from "./app";
 import { logger } from "./lib/logger";
 
-const rawPort = process.env["PORT"];
+loadRootEnv();
 
-if (!rawPort) {
+const rawPort = process.env["PORT"];
+const isReplit = process.env.REPL_ID !== undefined;
+const port = Number(rawPort ?? 8080);
+
+if (isReplit && !rawPort) {
   throw new Error(
     "PORT environment variable is required but was not provided.",
   );
 }
 
-const port = Number(rawPort);
-
 if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
+  throw new Error(`Invalid PORT value: "${rawPort ?? "8080"}"`);
 }
 
 app.listen(port, (err) => {
