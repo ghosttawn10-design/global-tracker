@@ -15,20 +15,18 @@ export function Footer() {
       <div className="container max-w-screen-xl px-4 md:px-6 mx-auto py-12 md:py-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-1 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5">
+            <Link href="/" className="flex items-center gap-2.5" aria-label={companyName}>
               {(settings as any)?.logoUrl ? (
-                <img src={(settings as any).logoUrl} alt={companyName} className="h-8 max-w-[140px] object-contain" />
+                <img src={(settings as any).logoUrl} alt="" className="h-8 w-8 object-contain shrink-0" />
               ) : (
-                <>
-                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-                    <Globe2 className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Truck className="h-3.5 w-3.5 text-primary" />
-                    <span className="font-bold tracking-tight">{companyName}</span>
-                  </div>
-                </>
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                  <Globe2 className="h-4 w-4 text-white" />
+                </div>
               )}
+              <div className="flex items-center gap-1">
+                <Truck className="h-3.5 w-3.5 text-primary" />
+                <span className="font-bold tracking-tight">{companyName}</span>
+              </div>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               World-class logistics and premium shipment tracking for businesses that demand absolute precision and reliability.

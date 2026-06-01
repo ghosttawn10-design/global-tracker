@@ -23,22 +23,20 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-white/8 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 max-w-screen-xl items-center px-4 md:px-6 mx-auto">
         <div className="flex items-center flex-1">
-          <Link href="/" className="flex items-center gap-2.5 mr-10">
+          <Link href="/" className="flex items-center gap-2.5 mr-10" aria-label={settings?.companyName || "GlobalTrack"}>
             {(settings as any)?.logoUrl ? (
-              <img src={(settings as any).logoUrl} alt={settings?.companyName || "GlobalTrack"} className="h-8 max-w-[140px] object-contain" />
+              <img src={(settings as any).logoUrl} alt="" className="h-8 w-8 object-contain shrink-0" />
             ) : (
-              <>
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-                  <Globe2 className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex items-center gap-1">
-                  <Truck className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-bold tracking-tight text-foreground">
-                    {settings?.companyName || "GlobalTrack"}
-                  </span>
-                </div>
-              </>
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                <Globe2 className="h-4 w-4 text-white" />
+              </div>
             )}
+            <div className="flex items-center gap-1">
+              <Truck className="h-3.5 w-3.5 text-primary" />
+              <span className="font-bold tracking-tight text-foreground">
+                {settings?.companyName || "GlobalTrack"}
+              </span>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">

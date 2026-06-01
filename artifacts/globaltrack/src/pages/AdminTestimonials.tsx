@@ -27,8 +27,8 @@ async function uploadFile(file: File): Promise<string> {
     body: formData,
   });
   if (!res.ok) throw new Error("Failed to upload file");
-  const { publicUrl, url } = await res.json();
-  return publicUrl ?? url;
+  const { id, publicUrl, url } = await res.json();
+  return id ? `${API_BASE}/storage/public-objects/${id}` : publicUrl ?? url;
 }
 
 const defaultForm = {
