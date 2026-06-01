@@ -42,21 +42,17 @@ function SettingsSection({ icon: Icon, title, children, delay = 0 }: {
 }
 
 async function uploadFile(file: File): Promise<string> {
-  const res = await fetch(`${API_BASE}/storage/uploads/request-url`, {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_BASE}/storage/uploads`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type }),
+    body: formData,
   });
-  if (!res.ok) throw new Error("Failed to get upload URL");
-  const { uploadURL, objectPath } = await res.json();
-  await fetch(uploadURL, {
-    method: "PUT",
-    headers: { "Content-Type": file.type },
-    body: file,
-  });
-  const filename = objectPath.split("/").pop();
-  return `${API_BASE}/storage/public-objects/${filename}`;
+  if (!res.ok) throw new Error("Failed to upload file");
+  const { publicUrl, url } = await res.json();
+  return publicUrl ?? url;
 }
 
 function ImageUploadButton({ onUploaded, uploading, setUploading, label = "Upload Image" }: {

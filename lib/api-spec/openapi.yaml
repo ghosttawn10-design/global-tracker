@@ -343,24 +343,24 @@ paths:
         "204":
           description: Deleted
 
-  /storage/uploads/request-url:
+  /storage/uploads:
     post:
-      operationId: requestUploadUrl
+      operationId: uploadFile
       tags: [settings]
-      summary: Request a presigned upload URL
+      summary: Upload a small file to Neon
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/RequestUploadUrlBody"
+              $ref: "#/components/schemas/UploadFileBody"
       responses:
-        "200":
-          description: Presigned upload URL
+        "201":
+          description: Uploaded file
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestUploadUrlResponse"
+                $ref: "#/components/schemas/UploadFileResponse"
 
   /settings:
     get:
@@ -954,30 +954,31 @@ components:
         - heroTitle
         - heroSubtitle
 
-    RequestUploadUrlBody:
+    UploadFileBody:
       type: object
       properties:
-        name:
+        file:
           type: string
-        size:
-          type: integer
-        contentType:
-          type: string
+          format: binary
       required:
-        - name
-        - size
-        - contentType
+        - file
 
-    RequestUploadUrlResponse:
+    UploadFileResponse:
       type: object
       properties:
-        uploadURL:
+        id:
           type: string
         objectPath:
           type: string
+        publicUrl:
+          type: string
+        url:
+          type: string
       required:
-        - uploadURL
+        - id
         - objectPath
+        - publicUrl
+        - url
 
     LoginBody:
       type: object
