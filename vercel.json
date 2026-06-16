@@ -3,9 +3,6 @@
   "outputDirectory": "artifacts/globaltrack/dist/public",
   "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/((?!api|assets|favicon.svg|opengraph.jpg|.*\\..*).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
