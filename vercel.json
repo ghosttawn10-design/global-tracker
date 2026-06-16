@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm run build",
-  "outputDirectory": "dist/public",
+  "outputDirectory": "artifacts/globaltrack/dist/public",
   "cleanUrls": true,
   "routes": [
     { "handle": "filesystem" },
