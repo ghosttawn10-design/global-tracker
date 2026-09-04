@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, siteSettingsTable } from "@workspace/db";
 import { UpdateSettingsBody } from "@workspace/api-zod";
+import { rewriteSettingsStorageUrls } from "../lib/rewrite-storage-url";
 
 const router = Router();
 
@@ -30,11 +31,11 @@ router.get("/", async (req, res): Promise<void> => {
 
   if (!settings) {
     const [created] = await db.insert(siteSettingsTable).values({}).returning();
-    res.json(created ?? defaultSettings);
+    res.json(rewriteSettingsStorageUrls(created ?? defaultSettings, req));
     return;
   }
 
-  res.json(settings);
+  res.json(rewriteSettingsStorageUrls(settings, req));
 });
 
 router.put("/", async (req, res): Promise<void> => {
@@ -51,7 +52,7 @@ router.put("/", async (req, res): Promise<void> => {
       .insert(siteSettingsTable)
       .values({ ...body.data, updatedAt: new Date() })
       .returning();
-    res.json(created);
+    res.json(rewriteSettingsStorageUrls(created, req));
     return;
   }
 
@@ -60,7 +61,7 @@ router.put("/", async (req, res): Promise<void> => {
     .set({ ...body.data, updatedAt: new Date() })
     .returning();
 
-  res.json(updated);
+  res.json(rewriteSettingsStorageUrls(updated, req));
 });
 
 export default router;
